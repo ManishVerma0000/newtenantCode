@@ -494,70 +494,35 @@ const registerTenate = async (req, res) => {
 }
 const updateTenate = async (req, res) => {
     try {
+        console.log('api is hit')
+        const updateObject = req.body
+        console.log(req.body)
+        const _id = req.query.id
 
-        const _id = req.params.id;
-        var userdetails;
-        if (!_id) {
-            await res.status(400).send({ message: "Please provide the id for the update" })
-        }
-        else {
-            userdetails = tenat.findById(_id);
+        const finduserandUpdate = await tenat.findByIdAndUpdate(_id, {
+            updateObject
+        })
+
+        console.log(finduserandUpdate, 'herer')
+        await res.status(200).send({ message: "here" })
 
 
-        }
+        // const _id = req.query.id;
+        // console.log(_id, 'this is the value of teh id')
+        // const updateObject = req.body
+        // if (!_id) {
+        //     await res.status(400).send({ message: "Please provide the id for the update" })
+        // }
+        // else {
+        //     userdetails = tenat.findById(_id);
 
-        const updateObject = {}
-        const { username, email, phone, address, orgnisation, buildingno, dateofjoining, rent } = req.body;
-        if (username) {
-            updateObject['username'] = username
-        } else {
-            updateObject['username'] = userdetails['username']
-        }
 
-        if (email) {
-            updateObject['email'] = email
-        }
-        else {
-            updateObject['email'] = userdetails['email']
-        }
+        // }
 
-        if (phone) {
-            updateObject['phone'] = phone
-        }
-        else {
-            updateObject['phone'] = userdetails['phone']
-        }
-        if (address) {
-            updateObject['address'] = address
-        }
-        else {
-            updateObject['address'] = userdetails['address']
-        }
 
-        if (orgnisation) {
-            updateObject['orgnisation'] = orgnisation
-        }
-        else {
-            updateObject['orgnisation'] = userdetails['orgnisation']
-        }
-        if (buildingno) {
-            updateObject['buildingno'] = buildingno
-        } else {
-            updateObject['buildingno'] = userdetails['buildingno']
-        }
-        if (dateofjoining) {
-            updateObject['dateofjoining'] = dateofjoining
-        } else {
-            updateObject['dateofjoining'] = userdetails['dateofjoining']
-        }
-        if (rent) {
-            updateObject['rent'] = rent
-        } else {
-            updateObject['rent'] = userdetails['rent']
-        }
 
-        const updaateDb = await tenat.findByIdAndUpdate(_id, updateObject)
-        await res.status(200).send(updaateDb)
+        // const updaateDb = await tenat.findByIdAndUpdate(_id, updateObject)
+        // await res.status(200).send(updaateDb)
 
     } catch (error) {
 

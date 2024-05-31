@@ -26,6 +26,7 @@ router.get('/caluclatedrent', caluclatedrent)
 
 router.get('/netBill', netBill)
 
+router.post('/updateTenate', updateTenate)
 
 router.get('/image', image)
 router.get('/monthlyCharge', monthlyCharge)
@@ -37,7 +38,7 @@ router.get('/singleBuildingDetails', singleBuildingDetails)
 router.get('/updateBuildings', updateBuildings)
 router.get('/deleteBuildings', deleteBuildings)
 router.get('/allVacanatRooms', allVacanatRooms)
-router.post('/updateTenate', updateTenate)
+
 router.get('/findopenRoomsOfBuilding', findopenRoomsOfBuilding)
 router.post('/updateRoom', updateRoom)
 router.get('/pdf', pdf)

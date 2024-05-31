@@ -6,10 +6,7 @@ const tenatSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    email: {
-        type: String,
-        default: ""
-    },
+ 
     phone: {
         type: String,
         default: ""

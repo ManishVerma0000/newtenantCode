@@ -85,10 +85,10 @@ app.get('/', async (req, res) => {
     await res.status(200).send({ message: "welcome to the first page" })
 })
 
-const ipAddress = '192.168.244.169'
+const ipAddress = '192.168.234.86'
 
-app.listen(port, () => {
-    console.log(`server is listen on the port on  http://localhost:${port}`)
+app.listen(port, ipAddress, () => {
+    console.log(`server is listen on the port on  http://${ipAddress}:${port}`)
 })
 //172.19.224.1
 
