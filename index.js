@@ -61,10 +61,10 @@ cron.schedule('0 0 15 * *', () => {
 //     fsExtra.emptyDirSync(pdf);
 // });
 
-// cron.schedule('*/5 * * * * *', () => {
-//     // checkBillpending();
-//     console.log('Task executed at:');
-// });
+cron.schedule('0 0 1 * *', () => {
+    checkBillpending();
+    console.log('Task executed at:');
+});
 
 
 // Parse the input date string

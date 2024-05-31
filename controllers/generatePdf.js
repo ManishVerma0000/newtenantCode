@@ -189,10 +189,10 @@ const generatepdf = async (req, res) => {
     <div class="page-content container">
         <div class="page-header text-blue-d2">
             <h1 class="page-title text-secondary-d1">
-                <span class="invoice">Cash Memo</span>
+                <span class="invoice">Invoice</span>
                 <small class="page-info">
                     <i class="fa fa-angle-double-right text-80"></i>
-                    ID:
+                 ${Date.now()}
                 </small>
             </h1>
         </div>
@@ -319,10 +319,7 @@ const generatepdf = async (req, res) => {
                     <div class="row">
                         <table class="invoice-details">
                             <tr>
-                                <td>
-                                    <span class="text-sm text-grey-m2 align-middle">Extra note such as company or
-                                        payment information...</span>
-                                </td>
+                               
                                 <td>
                                     <hr class="d-sm-none" />
                                     <div class="text-grey-m2" style="margin-left: 10%;">
@@ -610,7 +607,7 @@ const generatepdffirstTimeuer = async (req, res) => {
                 <span class="invoice">Cash Memo</span>
                 <small class="page-info">
                     <i class="fa fa-angle-double-right text-80"></i>
-                    ID:
+                    ${Date.now()}
                 </small>
             </h1>
         </div>
@@ -737,10 +734,7 @@ const generatepdffirstTimeuer = async (req, res) => {
                     <div class="row">
                         <table class="invoice-details">
                             <tr>
-                                <td>
-                                    <span class="text-sm text-grey-m2 align-middle">Extra note such as company or
-                                        payment information...</span>
-                                </td>
+                              
                                 <td>
                                     <hr class="d-sm-none" />
                                     <div class="text-grey-m2" style="margin-left: 10%;">

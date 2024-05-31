@@ -61,6 +61,7 @@ const registerTenate = async (req, res) => {
         let month = String(dateObj.getMonth() + 1).padStart(2, "0");
         let day = String(dateObj.getDate()).padStart(2, "0");
         let formattedDate = `${year}-${month}-${day}`;
+        console.log(formattedDate)
         const savedb = await tenat.create({
             dateofjoining: dateofjoining,
             username: username,
