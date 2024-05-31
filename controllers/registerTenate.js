@@ -266,7 +266,7 @@ const registerTenate = async (req, res) => {
                 <span class="invoice">Cash Memo</span>
                 <small class="page-info">
                     <i class="fa fa-angle-double-right text-80"></i>
-                    ID:
+                   ${Date.now()}
                 </small>
             </h1>
         </div>
