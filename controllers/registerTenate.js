@@ -381,10 +381,7 @@ const registerTenate = async (req, res) => {
                     <div class="row">
                         <table class="invoice-details">
                             <tr>
-                                <td>
-                                    <span class="text-sm text-grey-m2 align-middle">Extra note such as company or
-                                        payment information...</span>
-                                </td>
+                               
                                 <td>
                                     <hr class="d-sm-none" />
                                     <div class="text-grey-m2" style="margin-left: 10%;">
