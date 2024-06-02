@@ -20,7 +20,10 @@ const checkBillpending = require('../controllers/checkbillpending')
 const { holdBills, updateHoldBills } = require('../controllers/holdBills')
 const { monthlyCharge, caluclatedrent } = require('../controllers/monthlycharge')
 const image = require('../controllers/generateimage')
+const exportExcel = require('../controllers/generateExcel')
 
+
+router.get('/exportExcel', exportExcel)
 
 router.get('/caluclatedrent', caluclatedrent)
 

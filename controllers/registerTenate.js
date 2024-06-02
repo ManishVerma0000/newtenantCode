@@ -37,7 +37,7 @@ const registerTenate = async (req, res) => {
         const { username,
             tenates,
             email, phone, address, orgnisation, dateofjoining, rent, addhar, roomNo, buildingId, advanceRent } = req.body;
-        console.log(req.body.tenates)
+        console.log(req.body)
 
 
         let dateObj = new Date(dateofjoining);
