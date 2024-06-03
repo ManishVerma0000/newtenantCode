@@ -88,7 +88,7 @@ app.get('/', async (req, res) => {
 const ipAddress = '192.168.1.3'
 
 app.listen(port, () => {
-    console.log(`server is listen on the port on  http://${ipAddress}:${port}`)
+    console.log(`server is listen on the port on  http://localhost:${port}`)
 })
 //172.19.224.1
 

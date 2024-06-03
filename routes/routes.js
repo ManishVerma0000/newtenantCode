@@ -21,8 +21,9 @@ const { holdBills, updateHoldBills } = require('../controllers/holdBills')
 const { monthlyCharge, caluclatedrent } = require('../controllers/monthlycharge')
 const image = require('../controllers/generateimage')
 const exportExcel = require('../controllers/generateExcel')
+const otp = require('../controllers/otp')
 
-
+router.get('/otp', otp)
 router.get('/exportExcel', exportExcel)
 
 router.get('/caluclatedrent', caluclatedrent)

@@ -35,7 +35,7 @@ const pendingBill = async (req, res) => {
 const completedPayement = async (req, res) => {
     try {
 
-        const pendingBills = await tenat.find({ ispending: false })
+        const pendingBills = await tenat.find({ ispending: false, ishold: false })
         await res.status(200).send(pendingBills)
 
     } catch (error) {
