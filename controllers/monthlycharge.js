@@ -61,7 +61,7 @@ const caluclatedrent = async (req, res) => {
             console.log(rent)
 
             const amount = parseFloat(rent.Amount);
-            if (rent.ishold == false) {
+            if (rent.ishold == false && rent.ispending == false) {
                 completedTotal += amount;
             } else {
                 pendingTotal += amount;
