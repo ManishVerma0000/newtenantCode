@@ -16,9 +16,7 @@ const sendEmail = require('./middleware/email')
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-
-console.log(Date.now(), 'this si trhev')
+require("aws-sdk/lib/maintenance_mode_message").suppress = true;
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -31,7 +29,6 @@ const cron = require('node-cron');
 
 
 
-console.log(new Date().toLocaleDateString())
 
 const directoryPath = './pdf';
 
@@ -78,14 +75,14 @@ app.get('/image', upload, async (req, res) => {
 })
 
 
-console.log(new Date().toLocaleDateString(), 'new Date().toLocaleDateString()')
+
 
 app.get('/', async (req, res) => {
 
     await res.status(200).send({ message: "welcome to the first page" })
 })
 
-const ipAddress = '192.168.1.3'
+const ipAddress = '192.168.1.4'
 
 app.listen(port, () => {
     console.log(`server is listen on the port on  http://localhost:${port}`)
