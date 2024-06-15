@@ -499,11 +499,8 @@ const updateTenate = async (req, res) => {
         console.log(req.body)
         const _id = req.query.id
 
-        const finduserandUpdate = await tenat.findByIdAndUpdate(_id, {
-            updateObject
-        })
+        const finduserandUpdate = await tenat.findByIdAndUpdate(_id, updateObject)
 
-        console.log(finduserandUpdate, 'herer')
         await res.status(200).send({ message: "here" })
 
 
