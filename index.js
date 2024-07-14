@@ -11,7 +11,8 @@ const conn = require('./conn/db')
 const multer = require('multer')
 const path = require('path')
 const bodyParser = require('body-parser')
-const upload = require('./middleware/multer')
+const uploadsecond=require('./middleware/auth')
+
 const sendEmail = require('./middleware/email')
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,12 +27,40 @@ app.use(bodyParser.json())
 app.use('/api', router)
 
 const cron = require('node-cron');
-
-
-
-
+const storage = multer.diskStorage({
+    destination: path.join(__dirname, 'uploads'), // destination folder
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
 const directoryPath = './pdf';
+const upload = multer({
+    storage,
+    limits: { fileSize: 3500000000 },
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|gif|pdf/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname));
 
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        return cb("The uploaded file isn't compatible. We're sorry.");
+    }
+}).single('image');
+
+app.post('/img',uploadsecond,async(req,res)=>{
+    console.log(req.file)
+})
+
+app.post('/upload', upload, (req, res) => {
+    console.log(req.file);
+    if (!req.file) {
+        console.log('pi is hit')
+        return res.status(400).send('No file uploaded.');
+    }
+    res.send('File uploaded successfully.');
+});
 async function deleteAllFiles() {
     try {
         const files = await fs.readdir(directoryPath);
@@ -45,7 +74,6 @@ async function deleteAllFiles() {
     }
 }
 
-// deleteAllFiles();
 const checkBillpending = require('./controllers/checkbillpending')
 
 cron.schedule('0 0 15 * *', () => {
@@ -53,23 +81,16 @@ cron.schedule('0 0 15 * *', () => {
     deleteAllFiles()
     console.log('Task executed at:', currentTime);
 });
-// cron.schedule('*/2 * * * * *', () => {
-//     console.log('running')
-//     fsExtra.emptyDirSync(pdf);
-// });
+
 
 cron.schedule('0 0 1 * *', () => {
     checkBillpending();
     console.log('Task executed at:');
 });
 
-
-// Parse the input date string
-
-
 app.use('/pdf', express.static('pdf'))
 
-app.get('/image', upload, async (req, res) => {
+app.post('/image', upload, async (req, res) => {
 
     console.log(req.file)
 })
@@ -82,10 +103,10 @@ app.get('/', async (req, res) => {
     await res.status(200).send({ message: "welcome to the first page" })
 })
 
-const ipAddress = '192.168.1.4'
+const ipAddress = '192.168.205.211'
 
-app.listen(port, () => {
-    console.log(`server is listen on the port on  http://localhost:${port}`)
+app.listen(port,ipAddress, () => {
+    console.log(`server is listen on the port on  http://${ipAddress}:${port}`)
 })
 //172.19.224.1
 

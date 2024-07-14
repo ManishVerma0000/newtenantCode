@@ -599,7 +599,6 @@ const Tenateprofile = async (req, res) => {
             await res.status(400).send({ message: "please enter the id" })
         } else {
             const tenateDeatils = await tenat.findById(tenatId)
-            // const deleteuser = await tenat.findByIdAndDelete({ _id: tenatId })
             await res.status(200).send({ message: "updated successfullly", data: tenateDeatils })
         }
 
