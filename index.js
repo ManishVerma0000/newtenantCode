@@ -105,8 +105,8 @@ app.get('/', async (req, res) => {
 
 const ipAddress = '192.168.205.211'
 
-app.listen(port,ipAddress, () => {
-    console.log(`server is listen on the port on  http://${ipAddress}:${port}`)
+app.listen(port, () => {
+    console.log(`server is listen on the port on  http://localhost:${port}`)
 })
 //172.19.224.1
 
