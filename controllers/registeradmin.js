@@ -51,67 +51,6 @@ const loginadmin = async (req, res) => {
 }
 
 
-const changepassword = async (req, res) => {
-    try {
-        const _id = req.body._id;
-        const { password, confirmpassword } = req.body;
-
-        if (!_id || !password || !confirmpassword) {
-            await res.status(400).send({ message: "please enter all the details" })
-        } else {
-            const Password = await admin.findById(_id);
-
-            if (Password.password == password) {
-                const updatepassword = await admin.findByIdAndUpdate(_id, {
-                    password: confirmpassword
-                })
-                console.log(updatepassword)
-                await res.status(200).send({ message: "password updation is added successfully.." })
-            } else {
-                await res.status(400).send({ message: "password mismatch" })
-            }
-
-
-        }
-
-    } catch (error) {
-        await res.status(400).send({ message: error.message })
-
-    }
-}
-
-const forgetPassword = async (req, res) => {
-    try {
-        const { email, password, phone } = req.body;
-        if (!email || !password || !phone) {
-            await res.status(400).send({ message: "please enter all the details" })
-        } else {
-            const updatepassword = await admin.findOne({
-                email: email,
-                phone: phone
-
-            })
-            if (updatepassword) {
-                const updateuserpassword = await admin.findOneAndUpdate({
-                    email: email,
-                    phone: phone
-                }, {
-                    password: password
-                })
-
-                await res.status(200).send(updateuserpassword)
-
-            } else {
-                await res.status(400).send({ message: "password mismatch" })
-            }
-            console.log(updatepassword, 'this is the value of the updatepassword')
-        }
-
-    } catch (error) {
-
-        await res.status(400).send({ message: error.message })
-    }
-}
 
 
 
@@ -130,4 +69,4 @@ const adminProfile = async (req, res) => {
 
 
 
-module.exports = { registerAdmin, loginadmin, changepassword, forgetPassword, adminProfile }
+module.exports = { registerAdmin, loginadmin, adminProfile }

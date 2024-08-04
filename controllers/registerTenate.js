@@ -1,102 +1,92 @@
-const building = require('../schema/buildingModel');
-const Building = require('../schema/buildingModel');
-const tenat = require('../schema/tenatModel')
+const building = require("../schema/buildingModel");
+const Building = require("../schema/buildingModel");
+const tenat = require("../schema/tenatModel");
 
-const puppeteer = require('puppeteer')
-const AWS = require('aws-sdk');
+const puppeteer = require("puppeteer");
+const AWS = require("aws-sdk");
 
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 const netBill = async (req, res) => {
-    const totalRent = parseInt(3000)
+  const totalRent = parseInt(3000);
 
-    if (!totalRent) {
-        return res.status(400).json({ error: 'Invalid input. Please provide a valid totalRent.' });
-    }
+  if (!totalRent) {
+    return res
+      .status(400)
+      .json({ error: "Invalid input. Please provide a valid totalRent." });
+  }
 
-    const today = new Date();
-    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const today = new Date();
+  const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-    const daysInMonth = lastDayOfMonth.getDate();
-    const remainingDays = lastDayOfMonth.getDate() - today.getDate() + 1;
+  const daysInMonth = lastDayOfMonth.getDate();
+  const remainingDays = lastDayOfMonth.getDate() - today.getDate() + 1;
 
-    const dailyRent = totalRent / daysInMonth;
-    const proratedRent = dailyRent * remainingDays;
+  const dailyRent = totalRent / daysInMonth;
+  const proratedRent = dailyRent * remainingDays;
 
-    res.json({
-        totalRent,
-        dailyRent: dailyRent.toFixed(2),
-        remainingDays,
-        proratedRent: proratedRent.toFixed(2)
-    });
-}
-
+  res.json({
+    totalRent,
+    dailyRent: dailyRent.toFixed(2),
+    remainingDays,
+    proratedRent: proratedRent.toFixed(2),
+  });
+};
 
 const registerTenate = async (req, res) => {
+  try {
+    const {
+      people,
+      username,
+      phone,
+      dateofjoining,
+      rent,
+      deposit,
+      addhar,
+      roomNo,
+      buildingId,
+      advanceRent,
+    } = req.body;
+
+
+
+    let currentDate = new Date(dateofjoining);
+    let dateObj = currentDate.setMonth(currentDate.getMonth() + 1);
+    const savedb = await tenat.create({
+      dateofjoining: dateofjoining,
+      username: username,
+      phone: phone,
+      addhar: req.file.location,
+      rent: rent,
+      deposit: deposit,
+      roomNo: roomNo,
+      buildingId: buildingId,
+      NextInstallement: dateObj,
+      ispending: false,
+      advanceRent: advanceRent,
+      rentToBePaid: rent,
+      people: people,
+      tenates: [],
+      theBillisFirstTime: true,
+    });
+    const selectedRooms = roomNo;
+    const building = await Building.findById(buildingId);
+    const formattedSelectedRooms = Array.isArray(selectedRooms)
+      ? selectedRooms
+      : [selectedRooms];
+    building.completedRoom.push(...formattedSelectedRooms);
+    building.rooms = building.rooms.filter(
+      (room) => !formattedSelectedRooms.includes(room)
+    );
+    await building.save();
+    AWS.config.update({
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_S3_REGION_NAME,
+    });
+    const s3 = new AWS.S3();
     try {
-        const { username,
-            tenates,
-            email, phone, address, orgnisation, dateofjoining, rent, addhar, roomNo, buildingId, advanceRent } = req.body;
-        console.log(req.body)
-
-
-        let dateObj = new Date(dateofjoining);
-
-        const totalRent = parseInt(rent)
-        const today = dateObj;
-        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-        const daysInMonth = lastDayOfMonth.getDate();
-        const remainingDays = lastDayOfMonth.getDate() - today.getDate() + 1;
-
-        const dailyRent = totalRent / daysInMonth;
-        const proratedRent = dailyRent * remainingDays;
-
-        const rentToBePaid1 = parseInt(rent) - proratedRent
-
-
-        dateObj.setMonth(dateObj.getMonth() + 1);
-        dateObj.setDate(1);
-        let year = dateObj.getFullYear();
-        let month = String(dateObj.getMonth() + 1).padStart(2, "0");
-        let day = String(dateObj.getDate()).padStart(2, "0");
-        let formattedDate = `${year}-${month}-${day}`;
-        console.log(formattedDate)
-        const savedb = await tenat.create({
-            dateofjoining: dateofjoining,
-            username: username,
-            email: '',
-            phone: phone,
-            addhar: addhar,
-            address: address,
-            orgnisation: orgnisation,
-            rent: rent, roomNo: roomNo,
-            buildingId: buildingId,
-            NextInstallement: formattedDate,
-            ispending: false,
-            advanceRent: advanceRent, onhold: true,
-            rentToBePaid: rentToBePaid1,
-            tenates: tenates,
-            theBillisFirstTime: true
-        });
-        console.log(savedb)
-
-        const selectedRooms = roomNo
-        const building = await Building.findById(buildingId);
-        const formattedSelectedRooms = Array.isArray(selectedRooms) ? selectedRooms : [selectedRooms];
-        building.completedRoom.push(...formattedSelectedRooms);
-        building.rooms = building.rooms.filter(room => !formattedSelectedRooms.includes(room));
-        await building.save();
-
-        AWS.config.update({
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            region: process.env.AWS_S3_REGION_NAME
-        });
-
-        const s3 = new AWS.S3();
-        try {
-            const html1 = `<!DOCTYPE html>
+      const html1 = `<!DOCTYPE html>
 <html>
 
 <head>
@@ -299,7 +289,7 @@ const registerTenate = async (req, res) => {
                                 <td>
 
                                     <span class="text-sm text-grey-m2 align-middle">Address:</span>
-                                    <span class="text-600 text-110 text-blue align-middle">${address}</span>
+                                    <span class="text-600 text-110 text-blue align-middle">As per Addhar card details</span>
 
                                 </td>
                             </tr>
@@ -312,16 +302,6 @@ const registerTenate = async (req, res) => {
 
                                 </td>
                             </tr>
-
-                            <tr>
-                                <td>
-                                    <span class="text-sm text-grey-m2 align-middle">Orgnisation:</span>
-                                    <span
-                                        class="text-600 text-110 text-blue align-middle">${orgnisation}</span>
-
-                                </td>
-                            </tr>
-
                             <tr>
                                 <td>
                                     <span class="text-sm text-grey-m2 align-middle">Room No:</span>
@@ -333,8 +313,10 @@ const registerTenate = async (req, res) => {
                             <tr>
                                 <td>
                                     <span class="text-sm text-grey-m2 align-middle">BuildingName No:</span>
-                                    <span class="text-600 text-110 text-blue align-middle">${building.buildingname}
-                                        ${' '} ${building.location} </span>
+                                    <span class="text-600 text-110 text-blue align-middle">${
+                                      building.buildingname
+                                    }
+                                        ${" "} ${building.location} </span>
                                 </td>
                             </tr>
 
@@ -371,6 +353,15 @@ const registerTenate = async (req, res) => {
 
                                 </tr>
 
+                                 <tr class="mb-2 mb-sm-0 py-25 bgc-default-l4">
+                                    <td>2</td>
+                                    <td>Advance Rent</td>
+                                    <td>1</td>
+                                    <td>${deposit}</td>
+                                    <td>${deposit}</td>
+
+                                </tr>
+
 
                             </tbody>
                         </table>
@@ -387,8 +378,11 @@ const registerTenate = async (req, res) => {
                                     <div class="text-grey-m2" style="margin-left: 10%;">
                                         <div class="my-2"><i class="fa fa-circle text-blue-m2 text-xs mr-1"></i> <span
                                                 class="text-600 text-100" style="margin-right: 48px;">Sub Total</span>
-                                            ${parseInt(rent) +
-                parseInt(advanceRent)}</div>
+                                            ${
+                                              parseInt(rent) +
+                                              parseInt(advanceRent) +
+                                              parseInt(deposit)
+                                            }</div>
                                     </div>
                                 </td>
                             </tr>
@@ -432,180 +426,128 @@ const registerTenate = async (req, res) => {
 
 </html>`;
 
-            if (html1) {
-                puppeteer
-                    .launch({
-                        args: ['--no-sandbox', '--disable-setuid-sandbox']
-                    })
-                    .then(async browser => {
-
-
-
-                        const page = await browser.newPage();
-                        const html = html1;
-                        await page.setContent(html, {
-                            waitUntil: 'domcontentloaded'
-                        });
-
-                        const pdfBuffer = await page.pdf({
-                            format: 'A4'
-                        });
-
-                        await browser.close();
-
-                        const pdfFilename = `${uuidv4()}.pdf`;
-                        const bucketName = 'YOUR_S3_BUCKET_NAME';
-                        const s3Params = {
-                            Bucket: process.env.AWS_STORAGE_BUCKET_NAME,
-                            Key: pdfFilename,
-                            Body: pdfBuffer,
-                            ContentType: 'application/pdf',
-                            ACL: 'public-read' // Adjust as needed
-                        };
-
-                        s3.upload(s3Params, (error, data) => {
-                            if (error) {
-                                console.error(error);
-                                return res.status(400).send({ message: error.message });
-                            }
-
-                            const pdfUrl = data.Location;
-                            console.log(pdfUrl, 'this is thevakue of the url')
-                            return res.status(200).send({ data: pdfUrl });
-                        });
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        return res.status(400).send({ message: error.message });
-                    });
-            }
-
-        } catch (error) {
-            console.log(error.message);
-            res.status(400).send({ message: error.message });
-        }
-
-
-
+      if (html1) {
+        puppeteer
+          .launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+          })
+          .then(async (browser) => {
+            const page = await browser.newPage();
+            const html = html1;
+            await page.setContent(html, {
+              waitUntil: "domcontentloaded",
+            });
+            const pdfBuffer = await page.pdf({
+              format: "A4",
+            });
+            await browser.close();
+            const pdfFilename = `${uuidv4()}.pdf`;
+            const s3Params = {
+              Bucket: process.env.AWS_STORAGE_BUCKET_NAME,
+              Key: pdfFilename,
+              Body: pdfBuffer,
+              ContentType: "application/pdf",
+              ACL: "public-read",
+            };
+            s3.upload(s3Params, (error, data) => {
+              if (error) {
+                return res.status(400).send({ message: error.message });
+              }
+              const pdfUrl = data.Location;
+              console.log(pdfUrl, "this is the value of the pdf url");
+              return res.status(200).send({ data: pdfUrl, savedb });
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+            return res.status(400).send({ message: error.message });
+          });
+      }
     } catch (error) {
-        console.log(error)
-        await res.status(400).send(error.message)
+      console.log(error.message);
+      res.status(400).send({ message: error.message });
     }
-}
-const updateTenate = async (req, res) => {
-    try {
-        console.log('api is hit')
-        const updateObject = req.body
-        console.log(req.body)
-        const _id = req.query.id
-
-        const finduserandUpdate = await tenat.findByIdAndUpdate(_id, updateObject)
-
-        await res.status(200).send({ message: "here" })
-
-
-        // const _id = req.query.id;
-        // console.log(_id, 'this is the value of teh id')
-        // const updateObject = req.body
-        // if (!_id) {
-        //     await res.status(400).send({ message: "Please provide the id for the update" })
-        // }
-        // else {
-        //     userdetails = tenat.findById(_id);
-
-
-        // }
-
-
-
-        // const updaateDb = await tenat.findByIdAndUpdate(_id, updateObject)
-        // await res.status(200).send(updaateDb)
-
-    } catch (error) {
-
-        await res.status(400).send(error.message)
-    }
-}
-
-
-
-const tenateProfile = async (req, res) => {
-    try {
-
-        const _id = req.query.id;
-        const tenatedetails = await tenat.findById(_id)
-        await res.status(200).send(tenatedetails)
-    } catch (error) {
-        await res.status(400).send({ message: error.message })
-    }
-}
-
-
-
-
-const deleteTenateProfile = async (req, res) => {
-    try {
-        const tenatId = req.query.id;
-        if (!tenatId) {
-            return res.status(400).send({ message: "Please enter the id" });
-        }
-
-        // Find the tenant by ID
-        const deleteuser = await tenat.findById(tenatId);
-        if (!deleteuser) {
-            return res.status(404).send({ message: "Tenant not found" });
-        }
-
-        const roomNo = deleteuser.roomNo;
-        const buildingId = deleteuser.buildingId;
-
-        // Find the building by the tenant's building ID
-        const updateBuildings = await Building.findById(buildingId);
-        console.log(updateBuildings, 'this is the value of the building before the value changes')
-        if (!updateBuildings) {
-            return res.status(404).send({ message: "Building not found" });
-        }
-
-        // Check if the room is in completedRoom array and remove it
-        const completedRoomIndex = updateBuildings.completedRoom.indexOf(roomNo);
-        if (completedRoomIndex > -1) {
-            updateBuildings.completedRoom.splice(completedRoomIndex, 1);
-        }
-
-        // Add the room to the rooms array if it's not already there
-        if (!updateBuildings.rooms.includes(roomNo)) {
-            updateBuildings.rooms.push(roomNo);
-        }
-
-        // Save the updated building
-        const data = await updateBuildings.save();
-        console.log(data, 'after the logic is applied this is the fina; value')
-
-        // Delete the tenant
-        await tenat.findByIdAndDelete(tenatId);
-
-        res.status(200).send({ message: "Deleted successfully..." });
-    } catch (error) {
-        res.status(400).send({ message: error.message });
-    }
+  } catch (error) {
+    console.log(error);
+    await res.status(400).send(error.message);
+  }
 };
 
+const updateTenate = async (req, res) => {
+  try {
+    const updateObject = req.body;
+    console.log(req.body);
+    const _id = req.query.i;
+    const finduserandUpdate = await tenat.findByIdAndUpdate(_id, updateObject);
+    await res.status(200).send({ message: "here" });
+  } catch (error) {
+    await res.status(400).send(error.message);
+  }
+};
+
+const tenateProfile = async (req, res) => {
+  try {
+    const _id = req.query.id;
+    const tenatedetails = await tenat.findById(_id);
+    await res.status(200).send(tenatedetails);
+  } catch (error) {
+    await res.status(400).send({ message: error.message });
+  }
+};
+
+const deleteTenateProfile = async (req, res) => {
+  try {
+    const tenatId = req.query.id;
+    if (!tenatId) {
+      return res.status(400).send({ message: "Please enter the id" });
+    }
+    const deleteuser = await tenat.findById(tenatId);
+    if (!deleteuser) {
+      return res.status(404).send({ message: "Tenant not found" });
+    }
+
+    const roomNo = deleteuser.roomNo;
+    const buildingId = deleteuser.buildingId;
+    const updateBuildings = await Building.findById(buildingId);
+    if (!updateBuildings) {
+      return res.status(404).send({ message: "Building not found" });
+    }
+    const completedRoomIndex = updateBuildings.completedRoom.indexOf(roomNo);
+    if (completedRoomIndex > -1) {
+      updateBuildings.completedRoom.splice(completedRoomIndex, 1);
+    }
+    if (!updateBuildings.rooms.includes(roomNo)) {
+      updateBuildings.rooms.push(roomNo);
+    }
+    const data = await updateBuildings.save();
+    await tenat.findByIdAndDelete(tenatId);
+    res.status(200).send({ message: "Deleted successfully..." });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+};
 
 const Tenateprofile = async (req, res) => {
-    try {
-
-        const tenatId = req.query.id;
-        if (!tenatId) {
-            await res.status(400).send({ message: "please enter the id" })
-        } else {
-            const tenateDeatils = await tenat.findById(tenatId)
-            await res.status(200).send({ message: "updated successfullly", data: tenateDeatils })
-        }
-
-    } catch (error) {
-        await res.status(400).send({ message: error.message })
+  try {
+    const tenatId = req.query.id;
+    if (!tenatId) {
+      await res.status(400).send({ message: "please enter the id" });
+    } else {
+      const tenateDeatils = await tenat.findById(tenatId);
+      await res
+        .status(200)
+        .send({ message: "updated successfullly", data: tenateDeatils });
     }
-}
+  } catch (error) {
+    await res.status(400).send({ message: error.message });
+  }
+};
 
-
-module.exports = { registerTenate, updateTenate, tenateProfile, deleteTenateProfile, Tenateprofile, netBill }
+module.exports = {
+  registerTenate,
+  updateTenate,
+  tenateProfile,
+  deleteTenateProfile,
+  Tenateprofile,
+  netBill,
+};

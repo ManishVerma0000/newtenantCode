@@ -164,9 +164,6 @@ const singleBuildingDetails = async (req, res) => {
             const singleBuildingDetailsdb = await building.findById(id)
             await res.status(200).send(singleBuildingDetailsdb)
         }
-
-
-
     } catch (error) {
         await res.status(400).send(error.message)
 
